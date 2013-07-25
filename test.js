@@ -28,7 +28,20 @@ var Lens = require('./').Lens,
         {
             name: "Third record"
         }
-    ];
+    ],
+    complex = {
+        a: 1,
+        b: [1, 2, 3, 4],
+        c: {
+            x: [
+                {
+                    i: 1,
+                    j: "Hello"
+                }
+            ],
+            y: "World"
+        }
+    };
 
 exports.testUpdatePersonLocationNumber = function(test) {
     var location = Lens.objectLens('location'),
@@ -104,5 +117,26 @@ exports.testNestedFilter = function(test) {
             }
         ]
     );
+    test.done();
+};
+
+exports.testParserWithObjectAccess = function(test) {
+    var store = Lens.parse('c.y').run(complex);
+
+    test.equal(store.get(), 'World');
+    test.done();
+};
+
+exports.testParserWithObjectAndArrayAccess = function(test) {
+    var store = Lens.parse('c.x[0].j').run(complex);
+
+    test.equal(store.get(), 'Hello');
+    test.done();
+};
+
+exports.testParserWithEmptyValues = function(test) {
+    var store = Lens.parse('c...x[0].j').run(complex);
+
+    test.equal(store.get(), 'Hello');
     test.done();
 };

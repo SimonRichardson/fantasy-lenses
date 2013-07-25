@@ -17,6 +17,28 @@ function thisAndThen(b) {
     return b.compose(this);
 }
 
+// Not you could implement a bilby.js style of property.
+function isString(a) {
+    return typeof a === 'string';
+}
+function isNumber(a) {
+    return typeof a === 'number';
+}
+function isNotNaN(a) {
+    return !isNaN(a);
+}
+function isEmpty(a) {
+    return !/\S/.test(a);
+}
+function fold(a, v, f) {
+    var rec = function rec(v, index) {
+        return (index >= a.length) ?
+            v :
+            rec(f(v, a[index]), ++index);
+    };
+    return rec(v, 0);
+}
+
 // Methods
 Lens.id = function() {
     return Lens(function(target) {
@@ -76,6 +98,22 @@ Lens.arrayLens = function(index) {
                 return a[index];
             }
         );
+    });
+};
+Lens.parse = function(s) {
+    return fold(s.split('.'), Lens.id(), function(a, b) {
+        var access = fold(b.split('['), Lens.id(), function(a, b) {
+            var n = parseInt(b, 10);
+            return a.andThen(
+                (isNumber(n) && isNotNaN(n)) ?
+                Lens.arrayLens(n) :
+                   (isString(b) && isEmpty(b)) ?
+                   Lens.id() :
+                   Lens.objectLens(b)
+            );
+        });
+
+        return a.andThen(access);
     });
 };
 
