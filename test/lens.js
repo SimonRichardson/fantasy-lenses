@@ -5,22 +5,30 @@ const { laws: { identity:identity
               , retention:retention
               , doubleSet:doubleSet 
               }
-      , _1
-      , _2
+      , lens
+      , lensʹ
+      , read
+      , write
       } = require('../fantasy-lenses');
+const { singleton } = require('fantasy-helpers');
+const { Tuple } = require('fantasy-tuples');
 
-function testLensTupleLaws(f) {
-    return lens => λ.check(f(lens)(λ.equals), [λ.tupleOf(String, λ.AnyVal), λ.AnyVal]);
+function testLensLaws(f) {
+    return lens => λ.check(f(lens)(λ.equals), [λ.objectLike(singleton(k, λ.AnyVal))]);
 }
 
-exports._1 = {
-    'identity': testLensTupleLaws(identity)(_1),
-    'retention': testLensTupleLaws(retention)(_1),
-    'doubleSet': testLensTupleLaws(doubleSet)(_1)
+const k = λ.arb(String, λ.goal);
+const objectLens = lens(read(k), write(k));
+const lensʹʹ = lensʹ(o => Tuple(read(k, o), v => write(k, v, o)));
+
+exports.lensʹ = {
+    'identity': testLensLaws(identity)(lensʹʹ),
+    'retention': testLensLaws(retention)(lensʹʹ),
+    'doubleSet': testLensLaws(doubleSet)(lensʹʹ)
 };
 
-exports._2 = {
-    'identity': testLensTupleLaws(identity)(_2),
-    'retention': testLensTupleLaws(retention)(_2),
-    'doubleSet': testLensTupleLaws(doubleSet)(_2)
+exports.lens = {
+    'identity': testLensLaws(identity)(objectLens),
+    'retention': testLensLaws(retention)(objectLens),
+    'doubleSet': testLensLaws(doubleSet)(objectLens)
 };

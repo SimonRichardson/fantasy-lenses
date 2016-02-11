@@ -5,6 +5,7 @@ const setter = require('./src/setter');
 const lens = require('./src/lens');
 const iso = require('./src/iso');
 
+const object = require('./src/lens/object');
 const tuple = require('./src/lens/tuple');
 
 const lensʹ = require('./src/laws/lens');
@@ -16,4 +17,4 @@ function merge(obj) {
     return go(obj, [].slice.call(arguments, 1));
 }
 
-module.exports = merge(laws, lens, getter, setter, iso, tuple);
+module.exports = merge(laws, lens, getter, setter, iso, object, tuple);
